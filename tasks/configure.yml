@@ -42,6 +42,14 @@
     mode:  0755
     setype: mysqld_db_t
 
+- name: Create run dir for mariadb if it doesn't exist
+  file:
+    path: "/var/run/mysqld"
+    state: directory
+    owner: mysql
+    group: mysql
+    mode:  0755
+
 - name: Set ownership on slow query log file (if configured).
   file:
     path: "{{ mysql_slow_query_log_file }}"
@@ -64,6 +72,29 @@
     mode: 0640
   when: mysql_log == "" and mysql_log_error != ""
 
+- name: Run mysql_install_db
+  command: mysql_install_db --user=mysql --ldata=/var/lib/mysql
+  when: mysql_installed.stat.exists == false
+  # when: mysql_install_packages
+
+- name: Get debian-sys-maint password http://serverfault.com/questions/9948/what-is-the-debian-sys-maint-mysql-user-and-more
+  command: awk -F "= " '/password/ {print $2;exit;}' /etc/mysql/debian.cnf
+  # when: mysql_installed.stat.exists == false
+  register: debian_sys_password
+
+# - debug: var=debian_sys_password
+
+- name: Ensure MySQL is started
+  service: name={{ mysql_daemon }} state=started
+  ignore_errors: yes # This command errors because of the issue below
+
+- name: Grant debian-sys-maint permissions to DB http://serverfault.com/questions/9948/what-is-the-debian-sys-maint-mysql-user-and-more
+  shell: >
+    mysql -u root -NBe
+    "GRANT ALL PRIVILEGES ON *.* TO 'debian-sys-maint'@'localhost' IDENTIFIED BY '{{ debian_sys_password.stdout }}';"
+  # when: mysql_installed.stat.exists == false
+  # when: mysql_install_packages
+
 - name: Ensure MySQL is started and enabled on boot.
-  service: "name={{ mysql_daemon }} state=started enabled={{ mysql_enabled_on_startup }}"
+  service: name={{ mysql_daemon }} state=started enabled="{{ mysql_enabled_on_startup }}"
   register: mysql_service_configuration
