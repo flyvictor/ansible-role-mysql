@@ -1,4 +1,4 @@
 ---
 - name: restart mysql
-  service: "name={{ mysql_daemon }} state=restarted sleep=5"
-  # debug: msg="empty handler"
+  # service: "name={{ mysql_daemon }} state=restarted sleep=5"
+  debug: msg="empty handler"
