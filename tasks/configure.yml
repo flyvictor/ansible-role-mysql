@@ -98,3 +98,18 @@
 - name: Ensure MySQL is started and enabled on boot.
   service: name={{ mysql_daemon }} state=started enabled="{{ mysql_enabled_on_startup }}"
   register: mysql_service_configuration
+
+- debug: var=mysql_service_configuration
+
+- name: mysql status
+  command: service mysql status
+  register: out
+  ignore_errors: yes
+  
+- debug: var=out.stdout_lines
+
+- name: mysql start
+  command: service mysql start
+  register: out
+
+- debug: var=out.stdout_lines
