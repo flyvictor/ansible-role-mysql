@@ -88,6 +88,19 @@
   service: name={{ mysql_daemon }} state=started
   ignore_errors: yes # This command errors because of the issue below
 
+- name: mysql status
+  command: service mysql status
+  register: out
+  ignore_errors: yes
+  
+- debug: var=out.stdout_lines
+
+- name: mysql start
+  command: service mysql start
+  register: out
+
+- debug: var=out.stdout_lines
+
 - name: Grant debian-sys-maint permissions to DB http://serverfault.com/questions/9948/what-is-the-debian-sys-maint-mysql-user-and-more
   shell: >
     mysql -u root -NBe
@@ -98,3 +111,5 @@
 - name: Ensure MySQL is started and enabled on boot.
   service: name={{ mysql_daemon }} state=started enabled="{{ mysql_enabled_on_startup }}"
   register: mysql_service_configuration
+
+- debug: var=mysql_service_configuration
