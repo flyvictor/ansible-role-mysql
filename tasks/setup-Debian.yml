@@ -10,7 +10,7 @@
 - name: Ensure MySQL Python libraries are installed.
   apt: "name=python-mysqldb state=installed"
 
-- name: Ensure MySQL packages are installed.
+- name: Ensure MySQL packages are installed. (Debian)
   apt: "name={{ item }} state=installed"
   with_items: "{{ mysql_packages }}"
   register: deb_mysql_install_packages
