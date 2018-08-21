@@ -10,7 +10,7 @@
 
 - name: Define mysql_packages.
   set_fact:
-    mysql_packages: "{{ __mysql_packages | list }}"
+    mysql_packages: "{{ __mysql_packages | default([]) | list }}"
   when: mysql_packages is not defined
 
 - name: Define mysql_daemon.
@@ -25,13 +25,9 @@
 
 # Setup/install tasks.
 - include: setup-RedHat.yml
-  vars:
-    mysql_packages: "{{ mysql_packages }}"
   when: ansible_os_family == 'RedHat'
 
 - include: setup-Debian.yml
-  vars:
-    mysql_packages: "{{ mysql_packages }}"
   when: ansible_os_family == 'Debian'
 
 - name: Check if MySQL packages were installed.
